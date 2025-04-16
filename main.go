@@ -37,36 +37,36 @@ const (
 
 var (
 	frequency = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "stromzaehler_frequency_hz",
-		Help: "Netzfrequenz in Hz",
+		Name: "powermeter_frequency_hz",
+		Help: "frequency in Hz",
 	})
 	voltageL1 = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "stromzaehler_voltage_l1_v",
-		Help: "Spannung L1 in Volt",
+		Name: "powermeter_voltage_l1_v",
+		Help: "voltage L1 in Volt",
 	})
 	currentL1 = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "stromzaehler_current_l1_a",
-		Help: "Strom L1 in Ampere",
+		Name: "powermeter_current_l1_a",
+		Help: "current L1 in Ampere",
 	})
 	activePowerL1 = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "stromzaehler_power_active_kw",
-		Help: "Wirkleistung in kW",
+		Name: "powermeter_power_active_w",
+		Help: "active power in W",
 	})
 	reactivePowerL1 = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "stromzaehler_power_reactive_kvar",
-		Help: "Blindleistung in kvar",
+		Name: "powermeter_power_reactive_var",
+		Help: "reactive power in VAr",
 	})
 	apparentPowerL1 = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "stromzaehler_power_apparent_kva",
-		Help: "Scheinleistung in kVA",
+		Name: "powermeter_power_apparent_va",
+		Help: "apparent power in VA",
 	})
 	powerFactorL1 = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "stromzaehler_power_factor",
-		Help: "Leistungsfaktor",
+		Name: "powermeter_power_factor",
+		Help: "power factor",
 	})
 	totalEnergy = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "stromzaehler_energy_total_kwh",
-		Help: "Gesamtenergieverbrauch in kWh",
+		Name: "powermeter_energy_total_kwh",
+		Help: "total energy in kWh",
 	})
 )
 
@@ -107,14 +107,14 @@ func collectMetrics(client modbus.Client) {
 		return
 	}
 
-	log.Printf("Voltage L1: %.2f V\n", data.VoltageL1)
-	log.Printf("Current L1: %.2f A\n", data.CurrentL1)
-	log.Printf("Active Power L1: %.2f W\n", data.ActivePowerL1)
-	log.Printf("Reactive Power L1: %.2f Var\n", data.ReactivePowerL1)
-	log.Printf("Apparent Power L1: %.2f VA\n", data.ApparentPowerL1)
-	log.Printf("Power Factor L1: %.2f\n", data.PowerFactorL1)
-	log.Printf("Frequency: %.2f Hz\n", data.Frequency)
-	log.Printf("Energy Total: %.2f kWh\n", data.EnergyTotal)
+	// log.Printf("Voltage L1: %.2f V\n", data.VoltageL1)
+	// log.Printf("Current L1: %.2f A\n", data.CurrentL1)
+	// log.Printf("Active Power L1: %.2f W\n", data.ActivePowerL1)
+	// log.Printf("Reactive Power L1: %.2f Var\n", data.ReactivePowerL1)
+	// log.Printf("Apparent Power L1: %.2f VA\n", data.ApparentPowerL1)
+	// log.Printf("Power Factor L1: %.2f\n", data.PowerFactorL1)
+	// log.Printf("Frequency: %.2f Hz\n", data.Frequency)
+	// log.Printf("Energy Total: %.2f kWh\n", data.EnergyTotal)
 
 	frequency.Set(data.Frequency)
 	voltageL1.Set(data.VoltageL1)
