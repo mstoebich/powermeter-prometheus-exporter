@@ -1,9 +1,0 @@
-Bezeichnung,Adresse (hex),Adresse (dez),GrÃ¶ÃŸe,Datentyp,Skalierung,Einheit
-Spannung L1,131H,305,1 WORD,UINT,0.01 V,V
-Strom L1,139H-13AH,313,2 WORD,UINT,0.001 A,A
-Wirkleistung L1,140H-141H,320,2 WORD,LONG,0.001 kW,kW
-Blindleistung L1,148H-149H,328,2 WORD,LONG,0.001 kvar,kvar
-Scheinleistung L1,150H-151H,336,2 WORD,LONG,0.001 kva,kVA
-Leistungsfaktor L1,158H,344,1 WORD,INT,0.001,
-Frequenz,130H,304,1 WORD,UINT,0.01 Hz,Hz
-Energieverbrauch gesamt,A000H,40960,2 WORD,ULONG,0.01 kWh,kWh
