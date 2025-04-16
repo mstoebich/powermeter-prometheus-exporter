@@ -6,6 +6,7 @@ import (
 
 	// "fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/grid-x/modbus"
@@ -76,7 +77,14 @@ func init() {
 }
 
 func main() {
-	handler := modbus.NewTCPClientHandler("192.168.1.200:502") // IP und Port deines Gateways
+
+	powermeter_ip, ok := os.LookupEnv("POWERMETER_CONN")
+
+	if !ok {
+		log.Fatal("POWERMETER_IP environment variable not set")
+	}
+
+	handler := modbus.NewTCPClientHandler(powermeter_ip) // IP und Port deines Gateways
 	handler.Timeout = 5 * time.Second
 	handler.SlaveID = 1 // Modbus-Adresse des Stromzählers (z. B. 1)
 	err := handler.Connect()
@@ -90,27 +98,13 @@ func main() {
 	go func() {
 		for {
 			collectMetrics(client)
-			time.Sleep(10 * time.Second)
+			time.Sleep(1 * time.Second)
 		}
 	}()
 
 	http.Handle("/metrics", promhttp.Handler())
 	log.Println("Exporter läuft auf :9100/metrics")
 	log.Fatal(http.ListenAndServe(":9100", nil))
-	// powerMetrics, err := ReadPowerMetrics(client)
-
-	// if err != nil {
-	// 	log.Fatalf("Failed to read power metrics: %v", err)
-	// } else {
-	// 	fmt.Printf("Voltage L1: %.2f V\n", powerMetrics.VoltageL1)
-	// 	fmt.Printf("Current L1: %.2f A\n", powerMetrics.CurrentL1)
-	// 	fmt.Printf("Active Power L1: %.2f kW\n", powerMetrics.ActivePowerL1)
-	// 	fmt.Printf("Reactive Power L1: %.2f Var\n", powerMetrics.ReactivePowerL1)
-	// 	fmt.Printf("Apparent Power L1: %.2f VA\n", powerMetrics.ApparentPowerL1)
-	// 	fmt.Printf("Power Factor L1: %.2f\n", powerMetrics.PowerFactorL1)
-	// 	fmt.Printf("Frequency: %.2f Hz\n", powerMetrics.Frequency)
-	// 	fmt.Printf("Energy Total: %.2f kWh\n", powerMetrics.EnergyTotal)
-	// }
 
 }
 
@@ -120,6 +114,15 @@ func collectMetrics(client modbus.Client) {
 		log.Println("Modbus read error:", err)
 		return
 	}
+
+	log.Printf("Voltage L1: %.2f V\n", data.VoltageL1)
+	log.Printf("Current L1: %.2f A\n", data.CurrentL1)
+	log.Printf("Active Power L1: %.2f W\n", data.ActivePowerL1)
+	log.Printf("Reactive Power L1: %.2f Var\n", data.ReactivePowerL1)
+	log.Printf("Apparent Power L1: %.2f VA\n", data.ApparentPowerL1)
+	log.Printf("Power Factor L1: %.2f\n", data.PowerFactorL1)
+	log.Printf("Frequency: %.2f Hz\n", data.Frequency)
+	log.Printf("Energy Total: %.2f kWh\n", data.EnergyTotal)
 
 	frequency.Set(data.Frequency)
 	voltageL1.Set(data.VoltageL1)
