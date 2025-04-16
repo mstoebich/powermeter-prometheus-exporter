@@ -75,38 +75,29 @@ func init() {
 }
 
 func main() {
-
 	powermeter_conn, ok := os.LookupEnv("POWERMETER_CONN")
-
 	if !ok {
 		log.Fatal("POWERMETER_CONN environment variable not set")
 	}
 
-	handler := modbus.NewTCPClientHandler(powermeter_conn) // IP und Port deines Gateways
-	handler.Timeout = 5 * time.Second
-	handler.SlaveID = 1 // Modbus-Adresse des Stromzählers (z. B. 1)
-	err := handler.Connect()
-	if err != nil {
-		log.Fatalf("Connection failed: %v", err)
-	}
-
-	log.Println("Connected to Modbus device at ", powermeter_conn)
-
-	defer handler.Close()
-
-	client := modbus.NewClient(handler)
-
-	go func() {
-		for {
-			collectMetrics(client)
-			time.Sleep(1 * time.Second)
+	http.Handle("/metrics", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := modbus.NewTCPClientHandler(powermeter_conn)
+		handler.Timeout = 5 * time.Second
+		handler.SlaveID = 1
+		if err := handler.Connect(); err != nil {
+			log.Printf("Modbus connection error: %v", err)
+			http.Error(w, "Modbus connection failed", http.StatusInternalServerError)
+			return
 		}
-	}()
+		defer handler.Close()
 
-	http.Handle("/metrics", promhttp.Handler())
+		client := modbus.NewClient(handler)
+		collectMetrics(client)
+		promhttp.Handler().ServeHTTP(w, r)
+	}))
+
 	log.Println("Exporter läuft auf :9100/metrics")
 	log.Fatal(http.ListenAndServe(":9100", nil))
-
 }
 
 func collectMetrics(client modbus.Client) {
@@ -116,14 +107,14 @@ func collectMetrics(client modbus.Client) {
 		return
 	}
 
-	// log.Printf("Voltage L1: %.2f V\n", data.VoltageL1)
-	// log.Printf("Current L1: %.2f A\n", data.CurrentL1)
-	// log.Printf("Active Power L1: %.2f W\n", data.ActivePowerL1)
-	// log.Printf("Reactive Power L1: %.2f Var\n", data.ReactivePowerL1)
-	// log.Printf("Apparent Power L1: %.2f VA\n", data.ApparentPowerL1)
-	// log.Printf("Power Factor L1: %.2f\n", data.PowerFactorL1)
-	// log.Printf("Frequency: %.2f Hz\n", data.Frequency)
-	// log.Printf("Energy Total: %.2f kWh\n", data.EnergyTotal)
+	log.Printf("Voltage L1: %.2f V\n", data.VoltageL1)
+	log.Printf("Current L1: %.2f A\n", data.CurrentL1)
+	log.Printf("Active Power L1: %.2f W\n", data.ActivePowerL1)
+	log.Printf("Reactive Power L1: %.2f Var\n", data.ReactivePowerL1)
+	log.Printf("Apparent Power L1: %.2f VA\n", data.ApparentPowerL1)
+	log.Printf("Power Factor L1: %.2f\n", data.PowerFactorL1)
+	log.Printf("Frequency: %.2f Hz\n", data.Frequency)
+	log.Printf("Energy Total: %.2f kWh\n", data.EnergyTotal)
 
 	frequency.Set(data.Frequency)
 	voltageL1.Set(data.VoltageL1)
