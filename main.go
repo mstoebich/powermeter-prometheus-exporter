@@ -2,10 +2,8 @@ package main
 
 import (
 	"encoding/binary"
-	"net/http"
-
-	// "fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -78,19 +76,22 @@ func init() {
 
 func main() {
 
-	powermeter_ip, ok := os.LookupEnv("POWERMETER_CONN")
+	powermeter_conn, ok := os.LookupEnv("POWERMETER_CONN")
 
 	if !ok {
-		log.Fatal("POWERMETER_IP environment variable not set")
+		log.Fatal("POWERMETER_CONN environment variable not set")
 	}
 
-	handler := modbus.NewTCPClientHandler(powermeter_ip) // IP und Port deines Gateways
+	handler := modbus.NewTCPClientHandler(powermeter_conn) // IP und Port deines Gateways
 	handler.Timeout = 5 * time.Second
 	handler.SlaveID = 1 // Modbus-Adresse des Stromzählers (z. B. 1)
 	err := handler.Connect()
 	if err != nil {
 		log.Fatalf("Connection failed: %v", err)
 	}
+
+	log.Println("Connected to Modbus device at ", powermeter_conn)
+
 	defer handler.Close()
 
 	client := modbus.NewClient(handler)
@@ -115,14 +116,14 @@ func collectMetrics(client modbus.Client) {
 		return
 	}
 
-	log.Printf("Voltage L1: %.2f V\n", data.VoltageL1)
-	log.Printf("Current L1: %.2f A\n", data.CurrentL1)
-	log.Printf("Active Power L1: %.2f W\n", data.ActivePowerL1)
-	log.Printf("Reactive Power L1: %.2f Var\n", data.ReactivePowerL1)
-	log.Printf("Apparent Power L1: %.2f VA\n", data.ApparentPowerL1)
-	log.Printf("Power Factor L1: %.2f\n", data.PowerFactorL1)
-	log.Printf("Frequency: %.2f Hz\n", data.Frequency)
-	log.Printf("Energy Total: %.2f kWh\n", data.EnergyTotal)
+	// log.Printf("Voltage L1: %.2f V\n", data.VoltageL1)
+	// log.Printf("Current L1: %.2f A\n", data.CurrentL1)
+	// log.Printf("Active Power L1: %.2f W\n", data.ActivePowerL1)
+	// log.Printf("Reactive Power L1: %.2f Var\n", data.ReactivePowerL1)
+	// log.Printf("Apparent Power L1: %.2f VA\n", data.ApparentPowerL1)
+	// log.Printf("Power Factor L1: %.2f\n", data.PowerFactorL1)
+	// log.Printf("Frequency: %.2f Hz\n", data.Frequency)
+	// log.Printf("Energy Total: %.2f kWh\n", data.EnergyTotal)
 
 	frequency.Set(data.Frequency)
 	voltageL1.Set(data.VoltageL1)
