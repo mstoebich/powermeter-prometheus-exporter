@@ -191,6 +191,6 @@ func ReadPowerMetrics(client modbus.Client) (*PowerMetrics, error) {
 		ReactivePowerL1: float64(reactivePowerL1Raw),
 		ApparentPowerL1: float64(apparentPowerL1Raw),
 		PowerFactorL1:   float64(powerFactorL1Raw) * 0.001,
-		EnergyTotal:     float64(energyTotalRaw) * 0.001,
+		EnergyTotal:     float64(energyTotalRaw) * 0.01,
 	}, nil
 }
