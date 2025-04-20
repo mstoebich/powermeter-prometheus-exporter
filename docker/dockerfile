@@ -1,0 +1,28 @@
+# --- Build stage ---
+    FROM golang:1.23-alpine AS builder
+
+    # Optional: Zertifikate für HTTPS-Ausgehende Verbindungen (falls nötig)
+    RUN apk add --no-cache ca-certificates
+    
+    WORKDIR /app
+    
+    # Kopiere alle Go-Dateien
+    COPY . .
+    
+    # Statisches Binary bauen
+    RUN go mod tidy && go build -ldflags="-w -s" -o exporter
+    
+    # --- Final stage ---
+    FROM gcr.io/distroless/static
+    
+    WORKDIR /
+    
+    COPY --from=builder /app/exporter /exporter
+    
+    # Optionale Zertifikate, falls nötig (nicht bei Modbus TCP)
+    # COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+    
+    EXPOSE 9100
+    
+    ENTRYPOINT ["/exporter"]
+    
